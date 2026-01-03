@@ -1,9 +1,12 @@
 'use client'
 
-import { FC, useState } from 'react'
+import { FC, useState, useEffect } from 'react'
 import Link from 'next/link'
 import { YouTubePlayer } from '@/components/youtube-player'
 import { TradingSidebar } from '@/components/trading-sidebar'
+
+// Treasury/Creator wallet for receiving fees
+const TREASURY_ADDRESS = process.env.NEXT_PUBLIC_TREASURY_ADDRESS || ''
 
 interface WatchPageClientProps {
   videoId: string
@@ -11,14 +14,14 @@ interface WatchPageClientProps {
 
 export const WatchPageClient: FC<WatchPageClientProps> = ({ videoId }) => {
   const [showShareModal, setShowShareModal] = useState(false)
-
-  const shareUrl = typeof window !== 'undefined' 
-    ? `${window.location.origin}/watch/${videoId}`
-    : ''
-
-  const blinkUrl = typeof window !== 'undefined'
-    ? `${window.location.origin}/api/actions/trade?id=${videoId}`
-    : ''
+  const [shareUrl, setShareUrl] = useState('')
+  const [blinkUrl, setBlinkUrl] = useState('')
+  
+  // Set URLs on client-side only to avoid hydration mismatch
+  useEffect(() => {
+    setShareUrl(`${window.location.origin}/watch/${videoId}`)
+    setBlinkUrl(`${window.location.origin}/api/actions/trade?id=${videoId}`)
+  }, [videoId])
 
   const handleShare = () => {
     setShowShareModal(true)
@@ -129,7 +132,10 @@ export const WatchPageClient: FC<WatchPageClientProps> = ({ videoId }) => {
         {/* Trading Sidebar */}
         <aside className="hidden lg:block w-[380px] flex-shrink-0">
           <div className="fixed top-[73px] right-0 w-[380px] h-[calc(100vh-73px)]">
-            <TradingSidebar youtubeId={videoId} />
+            <TradingSidebar 
+              youtubeId={videoId} 
+              creatorWallet={TREASURY_ADDRESS}
+            />
           </div>
         </aside>
       </div>
