@@ -1,0 +1,20 @@
+[features]
+seeds = true
+skip-lint = false
+
+[programs.devnet]
+sipzy_vault = "SipzyVault111111111111111111111111111111111"
+
+[programs.localnet]
+sipzy_vault = "SipzyVault111111111111111111111111111111111"
+
+[registry]
+url = "https://api.apr.dev"
+
+[provider]
+cluster = "devnet"
+wallet = "~/.config/solana/id.json"
+
+[scripts]
+test = "pnpm run test"
+
