@@ -1,20 +1,34 @@
 import type { Metadata } from 'next'
-import { Geist, Geist_Mono } from 'next/font/google'
+import { Space_Grotesk, JetBrains_Mono } from 'next/font/google'
+import { SolanaWalletProvider } from '@/components/providers/wallet-provider'
 import './globals.css'
 
-const geistSans = Geist({
-  variable: '--font-geist-sans',
+const spaceGrotesk = Space_Grotesk({
+  variable: '--font-space-grotesk',
   subsets: ['latin'],
+  weight: ['300', '400', '500', '600', '700'],
 })
 
-const geistMono = Geist_Mono({
-  variable: '--font-geist-mono',
+const jetBrainsMono = JetBrains_Mono({
+  variable: '--font-jetbrains-mono',
   subsets: ['latin'],
+  weight: ['400', '500', '600', '700'],
 })
 
 export const metadata: Metadata = {
-  title: 'Solana x402 Template',
-  description: 'This is a Next.js template with Solana payment integration using the x402 protocol.',
+  title: 'Sipzy | Watch-to-Trade Creator Economy',
+  description: 'Trade creator tokens while watching content. Powered by Solana bonding curves and x402 micropayments.',
+  keywords: ['Solana', 'Creator Economy', 'Bonding Curve', 'Web3', 'Trading', 'YouTube'],
+  openGraph: {
+    title: 'Sipzy | Watch-to-Trade Creator Economy',
+    description: 'Trade creator tokens while watching content. Powered by Solana.',
+    type: 'website',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Sipzy | Watch-to-Trade Creator Economy',
+    description: 'Trade creator tokens while watching content. Powered by Solana.',
+  },
 }
 
 export default function RootLayout({
@@ -23,8 +37,12 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <html lang="en">
-      <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>{children}</body>
+    <html lang="en" className="dark">
+      <body className={`${spaceGrotesk.variable} ${jetBrainsMono.variable} font-sans antialiased bg-black text-white`}>
+        <SolanaWalletProvider>
+          {children}
+        </SolanaWalletProvider>
+      </body>
     </html>
   )
 }

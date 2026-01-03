@@ -1,5 +1,5 @@
 {
-  "name": "Sipzy",
+  "name": "sipzy",
   "scripts": {
     "dev": "next dev",
     "build": "next build",
@@ -8,17 +8,27 @@
   },
   "version": "0.1.0",
   "private": true,
-  "displayName": "X402 Next.js",
-  "description": "Next.js Solana starter with X402 payment protocol integration",
-  "usecase": "Payments",
+  "displayName": "Sipzy - Creator Token Economy",
+  "description": "Watch-to-Trade platform with Solana bonding curves and x402 payments",
+  "usecase": "Creator Economy",
   "keywords": [
     "solana",
     "nextjs",
     "x402",
-    "template",
-    "starter"
+    "bonding-curve",
+    "creator-economy",
+    "blinks"
   ],
   "dependencies": {
+    "@coral-xyz/anchor": "^0.30.1",
+    "@solana/actions": "^1.6.6",
+    "@solana/spl-token": "^0.4.9",
+    "@solana/wallet-adapter-base": "^0.9.23",
+    "@solana/wallet-adapter-react": "^0.15.35",
+    "@solana/wallet-adapter-react-ui": "^0.9.35",
+    "@solana/wallet-adapter-wallets": "^0.19.32",
+    "@solana/web3.js": "^1.98.0",
+    "bs58": "^6.0.0",
     "next": "16.0.10",
     "react": "19.2.0",
     "react-dom": "19.2.0",

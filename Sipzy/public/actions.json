@@ -1,0 +1,13 @@
+{
+  "rules": [
+    {
+      "pathPattern": "/api/actions/trade",
+      "apiPath": "/api/actions/trade"
+    },
+    {
+      "pathPattern": "/api/actions/trade/**",
+      "apiPath": "/api/actions/trade/**"
+    }
+  ]
+}
+
