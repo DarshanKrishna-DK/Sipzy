@@ -2,9 +2,10 @@
   "name": "sipzy",
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
+    "build": "prisma generate && next build",
     "start": "next start",
     "lint": "eslint",
+    "postinstall": "prisma generate",
     "test": "ts-mocha -p ./tsconfig.test.json -t 1000000 tests/**/*.ts"
   },
   "version": "0.1.0",
