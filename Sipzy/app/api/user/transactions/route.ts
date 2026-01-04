@@ -4,7 +4,7 @@ import { tradingState } from '@/lib/trading-state'
 
 export async function GET(request: NextRequest) {
   const searchParams = request.nextUrl.searchParams
-  let userId = searchParams.get('userId')
+  let userId: string = searchParams.get('userId') || ''
   const limit = parseInt(searchParams.get('limit') || '50')
   
   // Try to get from demo session if not provided

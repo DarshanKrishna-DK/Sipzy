@@ -5,7 +5,7 @@ import { getCurrentPrice, calculateMarketCap } from '@/lib/token-economics'
 
 export async function GET(request: NextRequest) {
   const searchParams = request.nextUrl.searchParams
-  let userId = searchParams.get('userId')
+  let userId: string = searchParams.get('userId') || ''
   
   // Try to get from demo session if not provided
   if (!userId) {

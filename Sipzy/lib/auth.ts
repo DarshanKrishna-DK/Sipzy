@@ -44,6 +44,13 @@ export function createSignMessage(nonce: string): string {
 }
 
 /**
+ * Create auth message with wallet and nonce (for production API)
+ */
+export function createAuthMessage(wallet: string, nonce: string): string {
+  return `Sign this message to authenticate with Sipzy.\n\nWallet: ${wallet}\nNonce: ${nonce}\n\nThis signature is free and does not cost any gas.`
+}
+
+/**
  * Verify a wallet signature
  */
 export async function verifySignature(
@@ -147,6 +154,27 @@ export async function setAuthCookie(token: string) {
 export async function clearAuthCookie() {
   const cookieStore = await cookies()
   cookieStore.delete('sipzy-auth')
+}
+
+/**
+ * Create a session for a wallet address
+ */
+export async function createSession(walletAddress: string) {
+  // Get or create user
+  const user = await prisma.user.upsert({
+    where: { walletAddress },
+    update: {},
+    create: { 
+      walletAddress,
+      nonce: crypto.randomUUID()
+    },
+  })
+  
+  // Create and set token
+  const token = await createToken(user.id, walletAddress)
+  await setAuthCookie(token)
+  
+  return user
 }
 
 /**
