@@ -6,7 +6,7 @@ import Link from 'next/link'
 import { SearchBar } from '@/components/search-bar'
 import { CoinCard } from '@/components/coin-card'
 import { YouTubePlayer } from '@/components/youtube-player'
-import { TradingSidebar } from '@/components/trading-sidebar'
+import { MockTradingPanel, MockTradingMetrics } from '@/components/mock-trading-panel'
 
 function SearchContent() {
   const searchParams = useSearchParams()
@@ -203,16 +203,17 @@ function SearchContent() {
                     {videoData.channelName && (
                       <p className="text-zinc-400 text-sm">{videoData.channelName}</p>
                     )}
-                    {searchMessage && (
-                      <p className="text-zinc-500 text-sm mt-2">{searchMessage}</p>
-                    )}
                   </div>
+                  
+                  {/* Trading Metrics below video */}
+                  <MockTradingMetrics videoId={videoData.videoId} />
                 </div>
                 
-                {/* Trading Sidebar */}
-                <div className="w-full lg:w-[380px]">
-                  <TradingSidebar 
-                    youtubeId={videoData.videoId}
+                {/* Mock Trading Panel */}
+                <div className="w-full lg:w-[400px]">
+                  <MockTradingPanel 
+                    videoId={videoData.videoId}
+                    videoTitle={videoData.title}
                   />
                 </div>
               </div>
