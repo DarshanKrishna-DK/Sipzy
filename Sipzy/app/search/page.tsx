@@ -5,6 +5,8 @@ import { useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { SearchBar } from '@/components/search-bar'
 import { CoinCard } from '@/components/coin-card'
+import { YouTubePlayer } from '@/components/youtube-player'
+import { TradingSidebar } from '@/components/trading-sidebar'
 
 function SearchContent() {
   const searchParams = useSearchParams()
@@ -19,22 +21,43 @@ function SearchContent() {
   const [results, setResults] = useState<any>({ creators: [], streams: [] })
   const [isLoading, setIsLoading] = useState(false)
   const [searchMessage, setSearchMessage] = useState<string | null>(null)
+  const [videoData, setVideoData] = useState<any>(null) // For YouTube video display
 
   const handleSearch = async (searchQuery: string) => {
     setQuery(searchQuery)
     setIsLoading(true)
     setSearchMessage(null)
+    setVideoData(null)
     
     try {
       const type = filterType === 'all' ? '' : filterType
       const res = await fetch(`/api/search?q=${encodeURIComponent(searchQuery)}&type=${type}`)
       const data = await res.json()
       
-      if (data.type === 'video' || data.type === 'creator') {
+      if (data.type === 'video') {
+        // YouTube video detected - show video player with trading
+        const videoId = data.video?.videoId || data.youtube?.videoId || extractVideoIdFromQuery(searchQuery)
+        if (videoId) {
+          setVideoData({
+            videoId,
+            title: data.video?.title || data.youtube?.title || 'Video',
+            channelName: data.video?.creator?.channelName || data.youtube?.channelName,
+            thumbnail: data.video?.thumbnail || data.youtube?.thumbnail,
+            hasToken: !!data.video?.coinAddress,
+            tokenAddress: data.video?.coinAddress,
+            creatorOptedIn: data.creatorOptedIn,
+          })
+        }
+        setSearchMessage(data.message)
+        setResults({
+          creators: [],
+          streams: data.video ? [data.video] : [],
+        })
+      } else if (data.type === 'creator') {
         setSearchMessage(data.message)
         setResults({
           creators: data.creator ? [data.creator] : [],
-          streams: data.video ? [data.video] : [],
+          streams: [],
         })
       } else {
         setResults(data.results || { creators: [], streams: [] })
@@ -44,6 +67,19 @@ function SearchContent() {
     } finally {
       setIsLoading(false)
     }
+  }
+  
+  // Helper to extract video ID from YouTube URL
+  const extractVideoIdFromQuery = (url: string): string | null => {
+    const patterns = [
+      /(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([^&\n?#]+)/,
+      /^([a-zA-Z0-9_-]{11})$/
+    ]
+    for (const pattern of patterns) {
+      const match = url.match(pattern)
+      if (match) return match[1]
+    }
+    return null
   }
 
   useEffect(() => {
@@ -147,9 +183,39 @@ function SearchContent() {
           </div>
 
           {/* Search Message */}
-          {searchMessage && (
+          {searchMessage && !videoData && (
             <div className="mb-6 p-4 bg-zinc-900 rounded-xl border border-zinc-800">
               <p className="text-zinc-300">{searchMessage}</p>
+            </div>
+          )}
+
+          {/* Video Player with Trading (when YouTube URL is searched) */}
+          {videoData && (
+            <div className="mb-8">
+              <div className="flex flex-col lg:flex-row gap-6">
+                {/* Video Player */}
+                <div className="flex-1">
+                  <YouTubePlayer videoId={videoData.videoId} />
+                  
+                  {/* Video Info */}
+                  <div className="mt-4 p-4 bg-zinc-900 rounded-xl border border-zinc-800">
+                    <h2 className="text-xl font-bold text-white mb-2">{videoData.title}</h2>
+                    {videoData.channelName && (
+                      <p className="text-zinc-400 text-sm">{videoData.channelName}</p>
+                    )}
+                    {searchMessage && (
+                      <p className="text-zinc-500 text-sm mt-2">{searchMessage}</p>
+                    )}
+                  </div>
+                </div>
+                
+                {/* Trading Sidebar */}
+                <div className="w-full lg:w-[380px]">
+                  <TradingSidebar 
+                    youtubeId={videoData.videoId}
+                  />
+                </div>
+              </div>
             </div>
           )}
 
