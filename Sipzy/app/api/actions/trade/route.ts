@@ -14,9 +14,9 @@ import {
 } from '@solana/web3.js'
 import { NextRequest, NextResponse } from 'next/server'
 
-// Program ID - Update after deployment
+// Program ID - Update after deployment (using devnet program or System Program as fallback)
 const PROGRAM_ID = new PublicKey(
-  process.env.NEXT_PUBLIC_PROGRAM_ID || 'SipzyVault111111111111111111111111111111111'
+  process.env.NEXT_PUBLIC_PROGRAM_ID || '11111111111111111111111111111111'
 )
 
 // Bonding curve constants
@@ -24,9 +24,9 @@ const BASE_PRICE_LAMPORTS = 10_000_000 // 0.01 SOL
 const SLOPE_LAMPORTS = 100_000 // 0.0001 SOL
 const LAMPORTS_PER_SOL = 1_000_000_000
 
-// Default creator wallet (treasury) - Update in production
+// Default creator wallet (treasury) - Update in production (using System Program as fallback)
 const DEFAULT_CREATOR = new PublicKey(
-  process.env.NEXT_PUBLIC_TREASURY_ADDRESS || 'SipzyTreasury11111111111111111111111111111'
+  process.env.NEXT_PUBLIC_TREASURY_ADDRESS || '11111111111111111111111111111111'
 )
 
 // RPC connection
