@@ -1,8 +1,38 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { prisma } from '@/lib/db'
+import { DEMO_MODE, mockFeaturedCreators, simulateDelay } from '@/lib/mock-data'
 
 export async function GET(request: NextRequest) {
+  // Demo mode
+  if (DEMO_MODE) {
+    await simulateDelay(400)
+    
+    const searchParams = request.nextUrl.searchParams
+    const limit = parseInt(searchParams.get('limit') || '20')
+    
+    const pools = mockFeaturedCreators.slice(0, limit).map(pool => ({
+      ...pool,
+      creator: {
+        channelName: pool.displayName,
+        channelImage: `https://api.dicebear.com/7.x/initials/svg?seed=${pool.displayName}`,
+        subscriberCount: Math.floor(Math.random() * 500000) + 10000,
+      }
+    }))
+    
+    return NextResponse.json({
+      pools,
+      pagination: {
+        page: 1,
+        limit,
+        total: mockFeaturedCreators.length,
+        pages: 1,
+      },
+    })
+  }
+
+  // Production mode
   try {
+    const { prisma } = await import('@/lib/db')
+    
     const searchParams = request.nextUrl.searchParams
     const sortBy = searchParams.get('sort') || 'volume' // volume, holders, price_change
     const page = parseInt(searchParams.get('page') || '1')
@@ -67,4 +97,3 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: 'Failed to fetch creators' }, { status: 500 })
   }
 }
-

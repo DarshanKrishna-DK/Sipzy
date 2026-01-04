@@ -1,8 +1,41 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { prisma } from '@/lib/db'
+import { DEMO_MODE, mockFeaturedStreams, simulateDelay } from '@/lib/mock-data'
 
 export async function GET(request: NextRequest) {
+  // Demo mode
+  if (DEMO_MODE) {
+    await simulateDelay(400)
+    
+    const searchParams = request.nextUrl.searchParams
+    const limit = parseInt(searchParams.get('limit') || '20')
+    
+    const pools = mockFeaturedStreams.slice(0, limit).map(pool => ({
+      ...pool,
+      video: {
+        title: pool.displayName,
+        thumbnail: `https://picsum.photos/seed/${pool.identifier}/480/270`,
+        creator: {
+          channelName: 'Demo Creator',
+          channelImage: `https://api.dicebear.com/7.x/initials/svg?seed=Demo`,
+        }
+      }
+    }))
+    
+    return NextResponse.json({
+      pools,
+      pagination: {
+        page: 1,
+        limit,
+        total: mockFeaturedStreams.length,
+        pages: 1,
+      },
+    })
+  }
+
+  // Production mode
   try {
+    const { prisma } = await import('@/lib/db')
+    
     const searchParams = request.nextUrl.searchParams
     const sortBy = searchParams.get('sort') || 'volume'
     const page = parseInt(searchParams.get('page') || '1')
@@ -72,4 +105,3 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: 'Failed to fetch streams' }, { status: 500 })
   }
 }
-

@@ -1,9 +1,48 @@
 import { NextResponse } from 'next/server'
-import { getCurrentUser } from '@/lib/auth'
-import { prisma } from '@/lib/db'
+import { cookies } from 'next/headers'
+import { 
+  DEMO_MODE, 
+  mockCreator, 
+  mockCreatorWithCoin,
+  mockStats, 
+  simulateDelay 
+} from '@/lib/mock-data'
+
+// In-memory state for demo mode
+let demoCreatorState = { ...mockCreator }
 
 export async function GET() {
+  // Demo mode
+  if (DEMO_MODE) {
+    await simulateDelay(300)
+    
+    const cookieStore = await cookies()
+    const demoSession = cookieStore.get('demo_session')
+    
+    if (!demoSession) {
+      return NextResponse.json({ error: 'Not authenticated' }, { status: 401 })
+    }
+    
+    return NextResponse.json({
+      creator: {
+        id: demoCreatorState.id,
+        channelId: demoCreatorState.channelId,
+        channelName: demoCreatorState.channelName,
+        channelImage: demoCreatorState.channelImage,
+        subscriberCount: demoCreatorState.subscriberCount,
+        coinCreated: demoCreatorState.coinCreated,
+        coinAddress: demoCreatorState.coinAddress,
+        autoApproveVideos: demoCreatorState.autoApproveVideos,
+      },
+      stats: mockStats,
+    })
+  }
+
+  // Production mode
   try {
+    const { getCurrentUser } = await import('@/lib/auth')
+    const { prisma } = await import('@/lib/db')
+    
     const user = await getCurrentUser()
     
     if (!user) {
@@ -51,7 +90,26 @@ export async function GET() {
 }
 
 export async function PATCH(request: Request) {
+  // Demo mode
+  if (DEMO_MODE) {
+    await simulateDelay(400)
+    
+    const body = await request.json()
+    const { coinCreated, coinAddress, autoApproveVideos } = body
+    
+    // Update in-memory state
+    if (coinCreated !== undefined) demoCreatorState.coinCreated = coinCreated
+    if (coinAddress) demoCreatorState.coinAddress = coinAddress
+    if (autoApproveVideos !== undefined) demoCreatorState.autoApproveVideos = autoApproveVideos
+    
+    return NextResponse.json({ success: true, creator: demoCreatorState })
+  }
+
+  // Production mode
   try {
+    const { getCurrentUser } = await import('@/lib/auth')
+    const { prisma } = await import('@/lib/db')
+    
     const user = await getCurrentUser()
     
     if (!user || !user.creator) {
@@ -77,3 +135,11 @@ export async function PATCH(request: Request) {
   }
 }
 
+// Reset demo state (useful for testing)
+export async function DELETE() {
+  if (DEMO_MODE) {
+    demoCreatorState = { ...mockCreator }
+    return NextResponse.json({ success: true, message: 'Demo state reset' })
+  }
+  return NextResponse.json({ error: 'Not in demo mode' }, { status: 400 })
+}

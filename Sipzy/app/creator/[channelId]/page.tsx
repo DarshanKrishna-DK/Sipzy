@@ -13,6 +13,25 @@ import {
   LAMPORTS_PER_SOL,
 } from '@/lib/program'
 
+const DEMO_MODE = process.env.NEXT_PUBLIC_DEMO_MODE === 'true'
+
+// Mock pool data for demo mode
+const getMockPoolData = (channelId: string) => ({
+  displayName: 'Demo Creator',
+  totalSupply: { toNumber: () => 150 },
+  basePrice: { toNumber: () => 10_000_000 },
+  curveParam: { toNumber: () => 100_000 },
+  reserveSol: { toNumber: () => 25_000_000 },
+  address: 'DemoPoolXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX',
+})
+
+// Mock creator data for demo mode
+const getMockCreatorData = (channelId: string) => ({
+  channelName: 'TechVision Studios',
+  channelImage: 'https://api.dicebear.com/7.x/initials/svg?seed=TV&backgroundColor=6366f1',
+  subscriberCount: 125000,
+})
+
 interface PageParams {
   channelId: string
 }
@@ -32,6 +51,15 @@ export default function CreatorPage({ params }: { params: Promise<PageParams> })
   useEffect(() => {
     async function fetchPool() {
       try {
+        // In demo mode, use mock data
+        if (DEMO_MODE) {
+          setPoolData(getMockPoolData(channelId))
+          setCreatorData(getMockCreatorData(channelId))
+          setIsLoading(false)
+          return
+        }
+
+        // Production mode - fetch from Solana
         const [poolAddress] = deriveCreatorPoolPDA(channelId)
         const state = await fetchPoolState(connection, poolAddress)
         
@@ -50,6 +78,12 @@ export default function CreatorPage({ params }: { params: Promise<PageParams> })
         }
       } catch (error) {
         console.error('Failed to fetch pool:', error)
+        
+        // In case of error, use mock data in demo mode
+        if (DEMO_MODE) {
+          setPoolData(getMockPoolData(channelId))
+          setCreatorData(getMockCreatorData(channelId))
+        }
       } finally {
         setIsLoading(false)
       }
@@ -94,8 +128,17 @@ export default function CreatorPage({ params }: { params: Promise<PageParams> })
 
   return (
     <div className="min-h-screen bg-black text-white">
+      {/* Demo Mode Banner */}
+      {DEMO_MODE && (
+        <div className="fixed top-0 left-0 right-0 z-[60] bg-gradient-to-r from-amber-500/20 via-orange-500/20 to-amber-500/20 border-b border-amber-500/30 py-2 px-4 text-center">
+          <span className="text-amber-400 text-sm font-medium">
+            🎮 Demo Mode — Simulated data, no real transactions
+          </span>
+        </div>
+      )}
+
       {/* Header */}
-      <header className="fixed top-0 left-0 right-0 z-50 bg-black/80 backdrop-blur-xl border-b border-zinc-800">
+      <header className={`fixed left-0 right-0 z-50 bg-black/80 backdrop-blur-xl border-b border-zinc-800 ${DEMO_MODE ? 'top-10' : 'top-0'}`}>
         <div className="flex items-center justify-between px-6 py-4">
           <Link href="/" className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-400 to-cyan-500 flex items-center justify-center font-bold text-black text-lg">
@@ -107,6 +150,9 @@ export default function CreatorPage({ params }: { params: Promise<PageParams> })
           </Link>
           
           <div className="flex items-center gap-4">
+            <Link href="/explore" className="text-zinc-400 hover:text-white transition">
+              Explore
+            </Link>
             <span className="px-3 py-1 bg-purple-500/20 text-purple-400 rounded-full text-sm font-semibold">
               $CREATOR
             </span>
@@ -116,7 +162,7 @@ export default function CreatorPage({ params }: { params: Promise<PageParams> })
       </header>
 
       {/* Main Content */}
-      <div className="flex pt-[73px] min-h-screen">
+      <div className={`flex min-h-screen ${DEMO_MODE ? 'pt-[113px]' : 'pt-[73px]'}`}>
         {/* Creator Info Section */}
         <main className="flex-1 p-6 lg:p-8">
           <div className="max-w-4xl mx-auto">
@@ -151,18 +197,26 @@ export default function CreatorPage({ params }: { params: Promise<PageParams> })
                       ? `${creatorData.subscriberCount.toLocaleString()} subscribers`
                       : 'YouTube Creator'}
                   </p>
-                  <a
-                    href={`https://youtube.com/channel/${channelId}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center gap-2 px-4 py-2 bg-red-500/10 text-red-400 rounded-lg hover:bg-red-500/20 transition"
-                  >
-                    <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
-                      <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814z"/>
-                      <polygon fill="#fff" points="9.545,15.568 15.818,12 9.545,8.432"/>
-                    </svg>
-                    View Channel
-                  </a>
+                  <div className="flex gap-3">
+                    <a
+                      href={`https://youtube.com/channel/${channelId}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-2 px-4 py-2 bg-red-500/10 text-red-400 rounded-lg hover:bg-red-500/20 transition"
+                    >
+                      <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814z"/>
+                        <polygon fill="#fff" points="9.545,15.568 15.818,12 9.545,8.432"/>
+                      </svg>
+                      View Channel
+                    </a>
+                    <Link
+                      href="/explore"
+                      className="inline-flex items-center gap-2 px-4 py-2 bg-zinc-800 text-zinc-300 rounded-lg hover:bg-zinc-700 transition"
+                    >
+                      View All Tokens →
+                    </Link>
+                  </div>
                 </div>
               </div>
             </div>
@@ -177,7 +231,7 @@ export default function CreatorPage({ params }: { params: Promise<PageParams> })
               
               <div className="p-4 bg-zinc-800 rounded-xl">
                 <p className="text-sm text-zinc-400">
-                  <span className="text-purple-400 font-mono">Price = Slope × Supply + Base</span>
+                  <span className="text-purple-400 font-mono">Price = Base + (Supply × Slope)</span>
                   <br />
                   Predictable, steady growth. Perfect for supporting your favorite creators long-term.
                 </p>
@@ -190,23 +244,42 @@ export default function CreatorPage({ params }: { params: Promise<PageParams> })
                 <div className="bg-zinc-900 rounded-xl border border-zinc-800 p-4">
                   <p className="text-zinc-500 text-xs mb-1">Market Cap</p>
                   <p className="text-lg font-bold">
-                    {((currentSupply * currentPrice) / LAMPORTS_PER_SOL).toFixed(2)} SOL
+                    {((currentSupply * currentPrice) / LAMPORTS_PER_SOL).toFixed(4)} SOL
                   </p>
                 </div>
                 <div className="bg-zinc-900 rounded-xl border border-zinc-800 p-4">
                   <p className="text-zinc-500 text-xs mb-1">Holders</p>
-                  <p className="text-lg font-bold">-</p>
+                  <p className="text-lg font-bold">{DEMO_MODE ? '12' : '-'}</p>
                 </div>
                 <div className="bg-zinc-900 rounded-xl border border-zinc-800 p-4">
                   <p className="text-zinc-500 text-xs mb-1">Total Volume</p>
-                  <p className="text-lg font-bold">-</p>
+                  <p className="text-lg font-bold">{DEMO_MODE ? '0.58 SOL' : '-'}</p>
                 </div>
                 <div className="bg-zinc-900 rounded-xl border border-zinc-800 p-4">
                   <p className="text-zinc-500 text-xs mb-1">Reserve</p>
                   <p className="text-lg font-bold">
-                    {((poolData?.reserveSol?.toNumber() || 0) / LAMPORTS_PER_SOL).toFixed(2)} SOL
+                    {((poolData?.reserveSol?.toNumber() || 0) / LAMPORTS_PER_SOL).toFixed(4)} SOL
                   </p>
                 </div>
+              </div>
+            )}
+
+            {/* Info about new trading system */}
+            {DEMO_MODE && (
+              <div className="mt-8 bg-gradient-to-br from-emerald-500/10 to-cyan-500/10 rounded-2xl border border-emerald-500/20 p-6">
+                <h3 className="text-lg font-bold text-emerald-400 mb-2">
+                  🚀 Try the New Trading System!
+                </h3>
+                <p className="text-zinc-400 mb-4">
+                  We've built a complete demo trading system. Visit the Explore page to see all tokens 
+                  and experience the full buy/sell flow with bonding curve economics.
+                </p>
+                <Link
+                  href="/explore"
+                  className="inline-flex px-6 py-3 bg-gradient-to-r from-emerald-500 to-cyan-500 text-black font-semibold rounded-xl hover:opacity-90 transition"
+                >
+                  Explore & Trade Tokens
+                </Link>
               </div>
             )}
           </div>
@@ -214,7 +287,7 @@ export default function CreatorPage({ params }: { params: Promise<PageParams> })
 
         {/* Trading Sidebar */}
         <aside className="hidden lg:block w-[400px] flex-shrink-0">
-          <div className="fixed top-[73px] right-0 w-[400px] h-[calc(100vh-73px)] overflow-y-auto p-6 border-l border-zinc-800">
+          <div className={`fixed right-0 w-[400px] h-[calc(100vh-${DEMO_MODE ? '113px' : '73px'})] overflow-y-auto p-6 border-l border-zinc-800 ${DEMO_MODE ? 'top-[113px]' : 'top-[73px]'}`}>
             {!poolData ? (
               /* Pool Not Created */
               <div className="bg-zinc-900 rounded-2xl border border-zinc-800 p-6 text-center">
@@ -313,7 +386,13 @@ export default function CreatorPage({ params }: { params: Promise<PageParams> })
                       </span>
                     </div>
                     <div className="flex justify-between text-xs mt-2">
-                      <span className="text-zinc-500">Fee (1%)</span>
+                      <span className="text-zinc-500">Creator Fee (10%)</span>
+                      <span className="text-purple-400">
+                        {((estimatedCost * 0.05) / LAMPORTS_PER_SOL).toFixed(6)} SOL
+                      </span>
+                    </div>
+                    <div className="flex justify-between text-xs mt-1">
+                      <span className="text-zinc-500">Platform Fee (1%)</span>
                       <span className="text-zinc-500">
                         {((estimatedCost * 0.01) / LAMPORTS_PER_SOL).toFixed(6)} SOL
                       </span>
@@ -321,7 +400,14 @@ export default function CreatorPage({ params }: { params: Promise<PageParams> })
                   </div>
 
                   {/* Trade Button */}
-                  {!connected ? (
+                  {DEMO_MODE ? (
+                    <Link
+                      href="/explore"
+                      className="block w-full py-3 rounded-xl font-semibold transition bg-gradient-to-r from-purple-500 to-pink-500 text-white hover:opacity-90 text-center"
+                    >
+                      Trade on Explore Page →
+                    </Link>
+                  ) : !connected ? (
                     <WalletMultiButton className="!w-full !bg-gradient-to-r !from-purple-500 !to-pink-500 !rounded-xl !h-12 !font-semibold !justify-center" />
                   ) : (
                     <button
@@ -336,6 +422,18 @@ export default function CreatorPage({ params }: { params: Promise<PageParams> })
                     </button>
                   )}
                 </div>
+
+                {/* Demo mode hint */}
+                {DEMO_MODE && (
+                  <div className="bg-amber-500/10 border border-amber-500/30 rounded-xl p-4 text-center">
+                    <p className="text-amber-400 text-sm">
+                      💡 For full trading functionality, visit the{' '}
+                      <Link href="/explore" className="underline font-semibold">
+                        Explore page
+                      </Link>
+                    </p>
+                  </div>
+                )}
               </>
             )}
           </div>
@@ -344,4 +442,3 @@ export default function CreatorPage({ params }: { params: Promise<PageParams> })
     </div>
   )
 }
-

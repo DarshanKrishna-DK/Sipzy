@@ -41,7 +41,7 @@
 ### Core Trading Engine
 - **Linear Bonding Curve** — Predictable pricing that increases with demand
 - **Instant Liquidity** — Buy and sell tokens anytime, no orderbooks
-- **1% Creator Fee** — Creators earn from every trade automatically
+- **10% Creator Fee** — Creators earn from every trade automatically
 - **Pool Per Video** — Each YouTube video has its own token pool
 
 ### Solana Actions (Blinks)

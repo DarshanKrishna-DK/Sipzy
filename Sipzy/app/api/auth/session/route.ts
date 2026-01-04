@@ -1,8 +1,38 @@
 import { NextResponse } from 'next/server'
-import { getCurrentUser } from '@/lib/auth'
+import { cookies } from 'next/headers'
+import { DEMO_MODE, mockUser, mockCreator, simulateDelay } from '@/lib/mock-data'
 
 export async function GET() {
+  // Demo mode - check demo session
+  if (DEMO_MODE) {
+    await simulateDelay(200)
+    
+    const cookieStore = await cookies()
+    const demoSession = cookieStore.get('demo_session')
+    
+    if (demoSession) {
+      try {
+        const session = JSON.parse(demoSession.value)
+        if (session.exp > Date.now()) {
+          return NextResponse.json({
+            authenticated: true,
+            user: {
+              ...mockUser,
+              walletAddress: session.walletAddress,
+            }
+          })
+        }
+      } catch (e) {
+        // Invalid session
+      }
+    }
+    
+    return NextResponse.json({ authenticated: false })
+  }
+
+  // Production mode
   try {
+    const { getCurrentUser } = await import('@/lib/auth')
     const user = await getCurrentUser()
     
     if (!user) {
@@ -15,17 +45,11 @@ export async function GET() {
         id: user.id,
         walletAddress: user.walletAddress,
         displayName: user.displayName,
-        isCreator: !!user.creator,
-        creator: user.creator ? {
-          channelId: user.creator.channelId,
-          channelName: user.creator.channelName,
-          coinCreated: user.creator.coinCreated,
-        } : null,
-      },
+        avatarUrl: user.avatarUrl,
+      }
     })
   } catch (error) {
     console.error('Session check error:', error)
     return NextResponse.json({ authenticated: false })
   }
 }
-

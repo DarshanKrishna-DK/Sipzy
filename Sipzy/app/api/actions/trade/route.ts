@@ -94,7 +94,7 @@ export async function GET(request: NextRequest) {
     type: 'action',
     icon: `https://img.youtube.com/vi/${youtubeId}/maxresdefault.jpg`,
     title: `🚀 Trade Sipzy Tokens`,
-    description: `Buy creator tokens for this video! Current price: ${currentPrice.toFixed(4)} SOL per token. Supply: ${currentSupply} tokens. 1% fee goes to the creator.`,
+    description: `Buy creator tokens for this video! Current price: ${currentPrice.toFixed(4)} SOL per token. Supply: ${currentSupply} tokens. 10% fee goes to the creator.`,
     label: 'Buy Tokens',
     links: {
       actions: [
