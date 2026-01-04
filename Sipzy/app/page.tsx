@@ -6,7 +6,6 @@ import { SearchBar } from '@/components/search-bar'
 import { CoinCard } from '@/components/coin-card'
 import { WalletAuthButton } from '@/components/wallet-auth-button'
 
-const DEMO_MODE = process.env.NEXT_PUBLIC_DEMO_MODE === 'true'
 
 interface PoolData {
   poolAddress: string
@@ -62,17 +61,8 @@ export default function HomePage() {
 
   return (
     <div className="min-h-screen bg-black text-white">
-      {/* Demo Mode Banner */}
-      {DEMO_MODE && (
-        <div className="fixed top-0 left-0 right-0 z-[60] bg-gradient-to-r from-amber-500/20 via-orange-500/20 to-amber-500/20 border-b border-amber-500/30 py-2 px-4 text-center">
-          <span className="text-amber-400 text-sm font-medium">
-            🎮 Demo Mode — Explore the full Sipzy experience with simulated data
-          </span>
-        </div>
-      )}
-      
       {/* Header */}
-      <header className={`fixed left-0 right-0 z-50 bg-black/80 backdrop-blur-xl border-b border-zinc-800 ${DEMO_MODE ? 'top-10' : 'top-0'}`}>
+      <header className="fixed top-0 left-0 right-0 z-50 bg-black/80 backdrop-blur-xl border-b border-zinc-800">
         <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
           <Link href="/" className="flex items-center gap-3 group">
             <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-400 to-cyan-500 flex items-center justify-center font-bold text-black text-lg shadow-lg shadow-emerald-500/20">
@@ -97,7 +87,7 @@ export default function HomePage() {
       </header>
 
       {/* Hero Section */}
-      <section className={`pb-20 px-6 ${DEMO_MODE ? 'pt-40' : 'pt-32'}`}>
+      <section className="pb-20 px-6 pt-32">
         <div className="max-w-4xl mx-auto text-center">
           <h1 className="text-5xl md:text-7xl font-bold mb-6">
             <span className="bg-gradient-to-r from-emerald-400 via-cyan-400 to-purple-500 bg-clip-text text-transparent">
