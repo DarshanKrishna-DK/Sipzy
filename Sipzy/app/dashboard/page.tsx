@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, Suspense } from 'react'
 import Link from 'next/link'
 import { useWallet } from '@solana/wallet-adapter-react'
 import { useConnection } from '@solana/wallet-adapter-react'
@@ -86,7 +86,7 @@ interface TokenInfo {
   volume24h?: number
 }
 
-export default function DashboardPage() {
+function DashboardContent() {
   const { publicKey, signMessage, connected, sendTransaction } = useWallet()
   const { connection } = useConnection()
   const searchParams = useSearchParams()
@@ -1465,5 +1465,23 @@ export default function DashboardPage() {
         </div>
       </main>
     </div>
+  )
+}
+
+// Loading fallback for Suspense
+function DashboardLoading() {
+  return (
+    <div className="min-h-screen bg-black text-white flex items-center justify-center">
+      <div className="animate-spin w-8 h-8 border-2 border-emerald-500 border-t-transparent rounded-full"></div>
+    </div>
+  )
+}
+
+// Export with Suspense wrapper for useSearchParams
+export default function DashboardPage() {
+  return (
+    <Suspense fallback={<DashboardLoading />}>
+      <DashboardContent />
+    </Suspense>
   )
 }
