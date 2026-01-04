@@ -7,7 +7,7 @@ export async function GET(req: NextRequest) {
   if (!wallet) {
     return NextResponse.json({ error: 'Wallet address required' }, { status: 400 })
   }
-
+  
   // Demo mode - return mock nonce
   if (DEMO_MODE) {
     await simulateDelay(300)

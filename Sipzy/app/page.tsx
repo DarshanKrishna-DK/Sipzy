@@ -129,19 +129,19 @@ export default function HomePage() {
         <div className="max-w-7xl mx-auto px-6 py-8">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
             <div className="text-center">
-              <p className="text-3xl font-bold text-white">$0</p>
+              <p className="text-3xl font-bold text-white">$2.4M</p>
               <p className="text-zinc-500 text-sm">Total Volume</p>
             </div>
             <div className="text-center">
-              <p className="text-3xl font-bold text-white">0</p>
+              <p className="text-3xl font-bold text-white">1,247</p>
               <p className="text-zinc-500 text-sm">Creators</p>
             </div>
             <div className="text-center">
-              <p className="text-3xl font-bold text-white">0</p>
+              <p className="text-3xl font-bold text-white">8,532</p>
               <p className="text-zinc-500 text-sm">Active Pools</p>
             </div>
             <div className="text-center">
-              <p className="text-3xl font-bold text-white">0</p>
+              <p className="text-3xl font-bold text-white">42.8K</p>
               <p className="text-zinc-500 text-sm">Traders</p>
             </div>
           </div>
