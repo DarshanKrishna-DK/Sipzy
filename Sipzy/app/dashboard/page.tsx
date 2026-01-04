@@ -968,10 +968,23 @@ function DashboardContent() {
     <div className="min-h-screen bg-black text-white">
       {/* Demo Mode Banner */}
       {DEMO_MODE && (
-        <div className="fixed top-0 left-0 right-0 z-50 bg-gradient-to-r from-amber-500/20 via-orange-500/20 to-amber-500/20 border-b border-amber-500/30 py-2 px-4 text-center">
+        <div className="fixed top-0 left-0 right-0 z-50 bg-gradient-to-r from-amber-500/20 via-orange-500/20 to-amber-500/20 border-b border-amber-500/30 py-2 px-4 text-center flex items-center justify-center gap-4">
           <span className="text-amber-400 text-sm font-medium">
-            🎮 Demo Mode Active — All transactions are simulated. No real blockchain or wallet required.
+            🎮 Demo Mode Active — All transactions are simulated.
           </span>
+          <button
+            onClick={async () => {
+              await fetch('/api/creator/profile', { method: 'DELETE' })
+              setCreator(prev => prev ? { ...prev, coinCreated: false, coinAddress: null } : null)
+              setCoinInfo(null)
+              setCreatorToken(null)
+              setVideoTokens([])
+              setSuccessMessage('Demo state reset! You can now create a new token.')
+            }}
+            className="px-3 py-1 bg-amber-500/30 hover:bg-amber-500/50 rounded-lg text-amber-300 text-xs font-medium transition"
+          >
+            Reset Demo
+          </button>
         </div>
       )}
       
