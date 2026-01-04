@@ -36,13 +36,13 @@ function SearchContent() {
       
       if (data.type === 'video') {
         // YouTube video detected - show video player with trading
-        const videoId = data.video?.videoId || data.youtube?.videoId || extractVideoIdFromQuery(searchQuery)
+        const videoId = data.videoId || data.video?.videoId || data.youtube?.videoId || extractVideoIdFromQuery(searchQuery)
         if (videoId) {
           setVideoData({
             videoId,
-            title: data.video?.title || data.youtube?.title || 'Video',
-            channelName: data.video?.creator?.channelName || data.youtube?.channelName,
-            thumbnail: data.video?.thumbnail || data.youtube?.thumbnail,
+            title: data.video?.title || data.youtube?.title || 'YouTube Video',
+            channelName: data.video?.creator?.channelName || data.youtube?.channelName || '',
+            thumbnail: data.video?.thumbnail || data.youtube?.thumbnail || `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg`,
             hasToken: !!data.video?.coinAddress,
             tokenAddress: data.video?.coinAddress,
             creatorOptedIn: data.creatorOptedIn,

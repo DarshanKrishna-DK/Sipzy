@@ -16,47 +16,81 @@ export async function GET(request: NextRequest) {
     
     if (videoId) {
       // Search for existing video coin
-      const video = await prisma.video.findUnique({
-        where: { videoId },
-        include: {
-          creator: {
-            select: { channelName: true, channelImage: true },
-          },
-        },
-      })
+      let video = null
+      let poolStats = null
       
-      if (video && video.status === 'APPROVED') {
-        const poolStats = await prisma.poolStats.findUnique({
-          where: { poolAddress: video.coinAddress! },
+      try {
+        video = await prisma.video.findUnique({
+          where: { videoId },
+          include: {
+            creator: {
+              select: { channelName: true, channelImage: true },
+            },
+          },
         })
         
+        if (video && video.status === 'APPROVED' && video.coinAddress) {
+          poolStats = await prisma.poolStats.findUnique({
+            where: { poolAddress: video.coinAddress },
+          })
+        }
+      } catch (e) {
+        // Database not available - continue with YouTube lookup
+        console.log('Database lookup failed, continuing with YouTube')
+      }
+      
+      if (video && video.status === 'APPROVED') {
         return NextResponse.json({
           type: 'video',
           video: { ...video, stats: poolStats },
+          videoId, // Always include videoId for iframe
           message: 'Video coin found',
         })
       }
       
-      // Video not in our system, fetch from YouTube
-      const youtubeVideo = await getVideoDetails(videoId)
+      // Video not in our system, try to fetch from YouTube API
+      let youtubeVideo = null
+      try {
+        youtubeVideo = await getVideoDetails(videoId)
+      } catch (e) {
+        console.log('YouTube API lookup failed')
+      }
+      
       if (youtubeVideo) {
         // Check if creator is opted in
-        const creator = await prisma.creator.findUnique({
-          where: { channelId: youtubeVideo.channelId },
-        })
+        let creator = null
+        try {
+          creator = await prisma.creator.findUnique({
+            where: { channelId: youtubeVideo.channelId },
+          })
+        } catch (e) {
+          // Ignore database errors
+        }
         
         return NextResponse.json({
           type: 'video',
           video: null,
+          videoId, // Always include videoId for iframe
           youtube: youtubeVideo,
           creatorOptedIn: !!creator?.coinCreated,
           message: creator?.coinCreated 
-            ? 'Video found but coin not created yet. Creator can approve it.'
-            : 'Video found but creator has not joined Sipzy yet.',
+            ? 'Video found! Creator can approve trading for this video.'
+            : 'Video found! You can trade tokens for this video.',
         })
       }
       
-      return NextResponse.json({ type: 'video', video: null, message: 'Video not found' })
+      // Even if YouTube API fails, still return videoId so iframe can be shown
+      return NextResponse.json({ 
+        type: 'video', 
+        video: null, 
+        videoId, // Always include videoId for iframe
+        youtube: {
+          videoId,
+          title: 'YouTube Video',
+          thumbnail: `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg`,
+        },
+        message: 'Video ready for trading!' 
+      })
     }
     
     if (channelId) {
